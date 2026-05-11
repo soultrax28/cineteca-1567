@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Consultor - Cineteca</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #f9f7f4;
+            color: #222;
+        }
+
+        /* Container Principal */
+        .consultor-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 2rem 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.1);
+            border-left-color: white;
+            color: white;
+        }
+
+        .menu-section-title {
+            padding: 1.5rem 1.5rem 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #2c1810;
+            font-size: 1.8rem;
+        }
+
+        .logout-btn {
+            padding: 0.8rem 1.5rem;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #38a169;
+        }
+
+        /* Contenido Secciones */
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h2 {
+            color: #2c1810;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #48bb78;
+            padding-bottom: 1rem;
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        th {
+            background: #f0ebe5;
+            color: #2c1810;
+            padding: 1rem;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #48bb78;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f9f7f4;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .badge-consultor {
+            background: #48bb78;
+            color: white;
+        }
+
+        .badge-active {
+            background: #48bb78;
+            color: white;
+        }
+
+        .badge-sold {
+            background: #f56565;
+            color: white;
+        }
+
+        .badge-available {
+            background: #48bb78;
+            color: white;
+        }
+
+        .badge-pending {
+            background: #ed8936;
+            color: white;
+        }
+
+        /* Card Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #f9f7f4;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #48bb78;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(72, 187, 120, 0.15);
+        }
+
+        .card h3 {
+            color: #2c1810;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 1rem;
+        }
+
+        .card-info {
+            background: white;
+            padding: 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-info strong {
+            color: #2c1810;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #e6fffa;
+            border-left: 4px solid #48bb78;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            color: #22543d;
+            margin-bottom: 1rem;
+        }
+
+        .info-box p {
+            color: #22543d;
+            line-height: 1.6;
+        }
+
+        /* Filtros */
+        .filter-section {
+            background: #f9f7f4;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c1810;
+            font-size: 0.9rem;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            align-self: flex-end;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #38a169;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2c1810;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Chart/Graph placeholder */
+        .chart-placeholder {
+            background: #f9f7f4;
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+            color: #999;
+            margin-bottom: 2rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #48bb78;
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            color: #2c1810;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #48bb78;
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-info {
+            background: #e6fffa;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        /* Restricción */
+        .restricted-notice {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 1.5rem;
+            border-left: 4px solid #f56565;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .restricted-notice h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                justify-self: start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="consultor-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🎞️ Cineteca</h2>
+                <div class="user-role">
+                    <span id="userRoleDisplay">Consultor</span>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-section-title">Principal</li>
+                <li><a href="#" class="menu-link active" data-section="dashboard">📊 Dashboard</a></li>
+
+                <li class="menu-section-title">Consultas</li>
+                <li><a href="#" class="menu-link" data-section="cartelera">🎬 Ver Cartelera</a></li>
+                <li><a href="#" class="menu-link" data-section="disponibilidad">💺 Disponibilidad de Asientos</a></li>
+                <li><a href="#" class="menu-link" data-section="funciones">🕐 Funciones</a></li>
+
+                <li class="menu-section-title">Reportes</li>
+                <li><a href="#" class="menu-link" data-section="ventas">💰 Resumen de Ventas</a></li>
+                <li><a href="#" class="menu-link" data-section="ocupacion">📈 Análisis de Ocupación</a></li>
+
+                <li class="menu-section-title">Acceso</li>
+                <li><a href="#" onclick="logout()">🚪 Cerrar Sesión</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <!-- Alert -->
+            <div id="alert" class="alert"></div>
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="content-section active">
+                <h2>Panel de Consultor</h2>
+
+                <div class="info-box">
+                    <h3>ℹ️ Información de Acceso</h3>
+                    <p>Como Consultor, tienes acceso de solo lectura a la información de la cineteca. Puedes consultar la cartelera, disponibilidad de asientos, funciones programadas y revisar reportes de ventas y ocupación.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>15</h3>
+                        <p>Películas en Cartelera</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>42</h3>
+                        <p>Funciones Esta Semana</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>78%</h3>
+                        <p>Ocupación Promedio</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>$18,600</h3>
+                        <p>Ingresos Este Mes</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2c1810;">Películas Destacadas Esta Semana</h3>
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>La Última Serenata</h3>
+                        <div class="card-meta">
+                            <span>España, 2024</span>
+                            <span class="badge badge-active">En Cartelera</span>
+                        </div>
+                        <div class="card-info">
+                            <strong>Género:</strong> Drama<br>
+                            <strong>Duración:</strong> 115 min<br>
+                            <strong>Director:</strong> Luis García
+                        </div>
+                        <p>Una reflexión profunda sobre el encuentro entre dos mundos artísticos. Cine de autor que toca el alma.</p>
+                        <button class="btn btn-primary btn-small" onclick="openModal('detallesModal', 1)">Ver Detalles</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Sombras del Pasado</h3>
+                        <div class="card-meta">
+                            <span>Argentina, 2023</span>
+                            <span class="badge badge-active">En Cartelera</span>
+                        </div>
+                        <div class="card-info">
+                            <strong>Género:</strong> Thriller<br>
+                            <strong>Duración:</strong> 128 min<br>
+                            <strong>Director:</strong> Martina Rodríguez
+                        </div>
+                        <p>Un thriller psicológico que explora la memoria y la identidad. Cine de suspenso inteligente.</p>
+                        <button class="btn btn-primary btn-small" onclick="openModal('detallesModal', 2)">Ver Detalles</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Voces Urbanas</h3>
+                        <div class="card-meta">
+                            <span>México, 2024</span>
+                            <span class="badge badge-active">En Cartelera</span>
+                        </div>
+                        <div class="card-info">
+                            <strong>Género:</strong> Documental<br>
+                            <strong>Duración:</strong> 98 min<br>
+                            <strong>Director:</strong> Carlos Mendoza
+                        </div>
+                        <p>Documental inmersivo sobre la cultura contemporánea. Realidad que supera la ficción.</p>
+                        <button class="btn btn-primary btn-small" onclick="openModal('detallesModal', 3)">Ver Detalles</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CARTELERA -->
+            <section id="cartelera" class="content-section">
+                <h2>Cartelera Actual</h2>
+
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="filterGenre">Género:</label>
+                        <select id="filterGenre">
+                            <option value="">Todos los géneros</option>
+                            <option value="drama">Drama</option>
+                            <option value="thriller">Thriller</option>
+                            <option value="documental">Documental</option>
+                            <option value="comedia">Comedia</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterCountry">País:</label>
+                        <select id="filterCountry">
+                            <option value="">Todos los países</option>
+                            <option value="españa">España</option>
+                            <option value="argentina">Argentina</option>
+                            <option value="mexico">México</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-buttons">
+                        <button class="btn btn-primary">Filtrar</button>
+                        <button class="btn btn-secondary">Limpiar</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Película</th>
+                            <th>País</th>
+                            <th>Año</th>
+                            <th>Género</th>
+                            <th>Duración</th>
+                            <th>Director</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>La Última Serenata</td>
+                            <td>España</td>
+                            <td>2024</td>
+                            <td>Drama</td>
+                            <td>115 min</td>
+                            <td>Luis García</td>
+                            <td><span class="badge badge-active">En Cartelera</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sombras del Pasado</td>
+                            <td>Argentina</td>
+                            <td>2023</td>
+                            <td>Thriller</td>
+                            <td>128 min</td>
+                            <td>Martina Rodríguez</td>
+                            <td><span class="badge badge-active">En Cartelera</span></td>
+                        </tr>
+                        <tr>
+                            <td>Voces Urbanas</td>
+                            <td>México</td>
+                            <td>2024</td>
+                            <td>Documental</td>
+                            <td>98 min</td>
+                            <td>Carlos Mendoza</td>
+                            <td><span class="badge badge-active">En Cartelera</span></td>
+                        </tr>
+                        <tr>
+                            <td>Nostalgia Cinematográfica</td>
+                            <td>Francia</td>
+                            <td>2023</td>
+                            <td>Drama</td>
+                            <td>120 min</td>
+                            <td>Jean-Pierre Dupont</td>
+                            <td><span class="badge badge-active">En Cartelera</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- DISPONIBILIDAD -->
+            <section id="disponibilidad" class="content-section">
+                <h2>Disponibilidad de Asientos</h2>
+
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="availMovie">Película:</label>
+                        <select id="availMovie" onchange="updateAvailability()">
+                            <option value="">Selecciona una película</option>
+                            <option value="1">La Última Serenata</option>
+                            <option value="2">Sombras del Pasado</option>
+                            <option value="3">Voces Urbanas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="availFunction">Función:</label>
+                        <select id="availFunction" onchange="loadSeatMap()">
+                            <option value="">Selecciona una función</option>
+                            <option value="1">25/03/2026 - 20:00</option>
+                            <option value="2">26/03/2026 - 19:00</option>
+                            <option value="3">27/03/2026 - 18:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 style="color: #2c1810; margin-bottom: 1.5rem;">Mapa de Asientos</h3>
+                <div style="background: #f9f7f4; padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 2rem;">
+                    <p style="margin-bottom: 1.5rem; color: #666;">
+                        <span style="color: #48bb78; font-weight: bold;">● Disponible</span> |
+                        <span style="color: #f56565; font-weight: bold;">● Vendido</span> |
+                        <span style="color: #ed8936; font-weight: bold;">● Reservado</span>
+                    </p>
+                    <div id="seatMap" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; max-width: 400px; margin: 0 auto;">
+                        <!-- Los asientos se generarán aquí -->
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Cantidad</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Total de Asientos</td>
+                            <td>150</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Asientos Vendidos</td>
+                            <td>105</td>
+                            <td>70%</td>
+                        </tr>
+                        <tr>
+                            <td>Asientos Disponibles</td>
+                            <td>45</td>
+                            <td>30%</td>
+                        </tr>
+                        <tr>
+                            <td>Asientos Reservados</td>
+                            <td>5</td>
+                            <td>3.3%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- FUNCIONES -->
+            <section id="funciones" class="content-section">
+                <h2>Funciones Programadas</h2>
+
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="funcDate">Fecha:</label>
+                        <input type="date" id="funcDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="funcSala">Sala:</label>
+                        <select id="funcSala">
+                            <option value="">Todas las salas</option>
+                            <option value="1">Sala 1 - Gold</option>
+                            <option value="2">Sala 2 - Premium</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-buttons">
+                        <button class="btn btn-primary">Buscar</button>
+                        <button class="btn btn-secondary">Limpiar</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Película</th>
+                            <th>Sala</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Duración</th>
+                            <th>Vendidos</th>
+                            <th>Disponibles</th>
+                            <th>Ocupación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>La Última Serenata</td>
+                            <td>Sala 1</td>
+                            <td>25/03/2026</td>
+                            <td>20:00</td>
+                            <td>115 min</td>
+                            <td><span class="badge badge-sold">105</span></td>
+                            <td><span class="badge badge-available">45</span></td>
+                            <td>70%</td>
+                        </tr>
+                        <tr>
+                            <td>Sombras del Pasado</td>
+                            <td>Sala 2</td>
+                            <td>25/03/2026</td>
+                            <td>19:00</td>
+                            <td>128 min</td>
+                            <td><span class="badge badge-sold">98</span></td>
+                            <td><span class="badge badge-available">22</span></td>
+                            <td>82%</td>
+                        </tr>
+                        <tr>
+                            <td>Voces Urbanas</td>
+                            <td>Sala 1</td>
+                            <td>26/03/2026</td>
+                            <td>18:00</td>
+                            <td>98 min</td>
+                            <td><span class="badge badge-sold">120</span></td>
+                            <td><span class="badge badge-available">30</span></td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td>La Última Serenata</td>
+                            <td>Sala 1</td>
+                            <td>26/03/2026</td>
+                            <td>22:30</td>
+                            <td>115 min</td>
+                            <td><span class="badge badge-sold">85</span></td>
+                            <td><span class="badge badge-available">65</span></td>
+                            <td>57%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- VENTAS -->
+            <section id="ventas" class="content-section">
+                <h2>Resumen de Ventas</h2>
+
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="ventasDesde">Desde:</label>
+                        <input type="date" id="ventasDesde">
+                    </div>
+                    <div class="filter-group">
+                        <label for="ventasHasta">Hasta:</label>
+                        <input type="date" id="ventasHasta">
+                    </div>
+                    <div class="filter-group filter-buttons">
+                        <button class="btn btn-primary">Generar Reporte</button>
+                        <button class="btn btn-secondary">Descargar PDF</button>
+                    </div>
+                </div>
+
+                <div class="chart-placeholder">
+                    📊 Gráfico de Ventas Diarias (Esta semana)
+                </div>
+
+                <h3 style="color: #2c1810; margin-bottom: 1rem;">Top 5 Películas Más Vendidas</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>Película</th>
+                            <th>Boletos Vendidos</th>
+                            <th>Ingresos</th>
+                            <th>Porcentaje del Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>La Última Serenata</td>
+                            <td>485</td>
+                            <td>$7,275</td>
+                            <td>39%</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sombras del Pasado</td>
+                            <td>420</td>
+                            <td>$6,300</td>
+                            <td>34%</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Voces Urbanas</td>
+                            <td>335</td>
+                            <td>$5,025</td>
+                            <td>27%</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Nostalgia Cinematográfica</td>
+                            <td>265</td>
+                            <td>$3,975</td>
+                            <td>20%</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Metropolis Remasterizado</td>
+                            <td>198</td>
+                            <td>$2,970</td>
+                            <td>15%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="background: #e6fffa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #48bb78;">
+                        <h4 style="color: #22543d; margin-bottom: 0.5rem;">Total de Ingresos</h4>
+                        <h3 style="color: #22543d; font-size: 2rem;">$25,545</h3>
+                    </div>
+                    <div style="background: #e6fffa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #48bb78;">
+                        <h4 style="color: #22543d; margin-bottom: 0.5rem;">Boletos Vendidos</h4>
+                        <h3 style="color: #22543d; font-size: 2rem;">1,703</h3>
+                    </div>
+                    <div style="background: #e6fffa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #48bb78;">
+                        <h4 style="color: #22543d; margin-bottom: 0.5rem;">Precio Promedio</h4>
+                        <h3 style="color: #22543d; font-size: 2rem;">$15.00</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OCUPACIÓN -->
+            <section id="ocupacion" class="content-section">
+                <h2>Análisis de Ocupación</h2>
+
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="ocupPeriodo">Período:</label>
+                        <select id="ocupPeriodo">
+                            <option value="week">Esta Semana</option>
+                            <option value="month">Este Mes</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-buttons">
+                        <button class="btn btn-primary">Actualizar</button>
+                    </div>
+                </div>
+
+                <div class="chart-placeholder">
+                    📈 Gráfico de Ocupación Promedio
+                </div>
+
+                <h3 style="color: #2c1810; margin-bottom: 1rem;">Ocupación por Sala</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sala</th>
+                            <th>Capacidad Total</th>
+                            <th>Asientos Vendidos</th>
+                            <th>Porcentaje de Ocupación</th>
+                            <th>Tendencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sala 1 - Gold</td>
+                            <td>150</td>
+                            <td>105</td>
+                            <td>70%</td>
+                            <td>📈 Estable</td>
+                        </tr>
+                        <tr>
+                            <td>Sala 2 - Premium</td>
+                            <td>120</td>
+                            <td>98</td>
+                            <td>82%</td>
+                            <td>📈 Creciente</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="color: #2c1810; margin: 2rem 0 1rem 0;">Ocupación por Película</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Película</th>
+                            <th>Funciones</th>
+                            <th>Ocupación Promedio</th>
+                            <th>Función Más Llena</th>
+                            <th>Función Menos Llena</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>La Última Serenata</td>
+                            <td>8</td>
+                            <td>72%</td>
+                            <td>85%</td>
+                            <td>55%</td>
+                        </tr>
+                        <tr>
+                            <td>Sombras del Pasado</td>
+                            <td>7</td>
+                            <td>78%</td>
+                            <td>90%</td>
+                            <td>65%</td>
+                        </tr>
+                        <tr>
+                            <td>Voces Urbanas</td>
+                            <td>6</td>
+                            <td>75%</td>
+                            <td>82%</td>
+                            <td>68%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 2rem; background: #e6fffa; padding: 1.5rem; border-left: 4px solid #48bb78; border-radius: 8px;">
+                    <h3 style="color: #22543d; margin-bottom: 1rem;">📊 Resumen General de Ocupación</h3>
+                    <ul style="list-style: none; color: #22543d;">
+                        <li><strong>Ocupación Promedio General:</strong> 76%</li>
+                        <li><strong>Mejor Desempeño:</strong> Sábados (85% promedio)</li>
+                        <li><strong>Peor Desempeño:</strong> Lunes (65% promedio)</li>
+                        <li><strong>Capacidad Total Disponible:</strong> 270 asientos</li>
+                        <li><strong>Capacidad Promedio Utilizada:</strong> 205 asientos</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Detalles -->
+    <div id="detallesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detalles de Película</h2>
+                <button class="close-btn" onclick="closeModal('detallesModal')">×</button>
+            </div>
+            <div id="modalBody" style="color: #666;">
+                <!-- El contenido se carga dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Usuario actual
+        const currentUser = {
+            name: "Carlos Rodríguez",
+            email: "carlos@cineteca.org",
+            role: "consultor"
+        };
+
+        // Datos de películas
+        const moviesData = {
+            1: {
+                title: "La Última Serenata",
+                country: "España",
+                year: 2024,
+                genre: "Drama",
+                duration: 115,
+                director: "Luis García",
+                sinopsis: "Una reflexión profunda sobre el encuentro entre dos mundos artísticos. Cine de autor que toca el alma."
+            },
+            2: {
+                title: "Sombras del Pasado",
+                country: "Argentina",
+                year: 2023,
+                genre: "Thriller",
+                duration: 128,
+                director: "Martina Rodríguez",
+                sinopsis: "Un thriller psicológico que explora la memoria y la identidad. Cine de suspenso inteligente."
+            },
+            3: {
+                title: "Voces Urbanas",
+                country: "México",
+                year: 2024,
+                genre: "Documental",
+                duration: 98,
+                director: "Carlos Mendoza",
+                sinopsis: "Documental inmersivo sobre la cultura contemporánea. Realidad que supera la ficción."
+            }
+        };
+
+        // Inicializar
+        document.getElementById('userRoleDisplay').textContent = 
+            currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+
+        // Cambiar sección
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+
+                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+                document.getElementById('pageTitle').textContent = 
+                    link.textContent.trim().split('\n')[0].replace(/^[^a-z0-9]+/i, '');
+            });
+        });
+
+        // Modal functions
+        function openModal(modalId, movieId) {
+            const modal = document.getElementById(modalId);
+            if (movieId && moviesData[movieId]) {
+                const movie = moviesData[movieId];
+                document.getElementById('modalTitle').textContent = movie.title;
+                document.getElementById('modalBody').innerHTML = `
+                    <div style="line-height: 1.8;">
+                        <p><strong>País:</strong> ${movie.country}</p>
+                        <p><strong>Año:</strong> ${movie.year}</p>
+                        <p><strong>Género:</strong> ${movie.genre}</p>
+                        <p><strong>Duración:</strong> ${movie.duration} minutos</p>
+                        <p><strong>Director:</strong> ${movie.director}</p>
+                        <hr style="border: none; border-top: 1px solid #ddd; margin: 1rem 0;">
+                        <p><strong>Sinopsis:</strong></p>
+                        <p style="font-style: italic;">${movie.sinopsis}</p>
+                    </div>
+                `;
+            }
+            modal.classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Generar mapa de asientos
+        function loadSeatMap() {
+            const seatMap = document.getElementById('seatMap');
+            seatMap.innerHTML = '';
+            
+            const totalSeats = 150;
+            const soldSeats = 105;
+            const reservedSeats = 5;
+            
+            for (let i = 1; i <= totalSeats; i++) {
+                const seat = document.createElement('div');
+                seat.style.cssText = `
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    font-size: 11px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    background: ${i <= soldSeats ? '#f56565' : i <= soldSeats + reservedSeats ? '#ed8936' : '#48bb78'};
+                    color: white;
+                `;
+                
+                seat.textContent = i;
+                seat.title = i <= soldSeats ? 'Vendido' : i <= soldSeats + reservedSeats ? 'Reservado' : 'Disponible';
+                seatMap.appendChild(seat);
+            }
+        }
+
+        function updateAvailability() {
+            loadSeatMap();
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

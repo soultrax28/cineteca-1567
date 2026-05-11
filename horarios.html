@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cineteca Nacional - Horarios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            color: #222;
+            line-height: 1.6;
+            background: #f9f7f4;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f08 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav a:hover {
+            color: #d4af37;
+        }
+
+        .hero {
+            margin-top: 60px;
+            padding: 70px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f08 100%);
+            color: #d4af37;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hero p {
+            color: #ddd;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e0d9cf;
+            padding: 1.2rem;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .filters h2 {
+            font-size: 1rem;
+            color: #2c1810;
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .date-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.7rem;
+        }
+
+        .date-chip {
+            border: 1px solid #d7d7d7;
+            background: white;
+            padding: 0.75rem;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #2c1810;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .date-chip.active {
+            background: #d4af37;
+            color: #1a0f08;
+            border-color: #c89f22;
+        }
+
+        .schedule-title {
+            font-size: 1.3rem;
+            color: #2c1810;
+            margin: 1.4rem 0 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .movie-schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .movie-schedule {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 1rem;
+            align-items: start;
+            background: white;
+            border: 1px solid #dfd8cd;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+
+        .movie-thumb {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #d4af37;
+        }
+
+        .movie-content h3 {
+            color: #2c1810;
+            margin-bottom: 0.35rem;
+            font-size: 1.2rem;
+        }
+
+        .movie-meta {
+            color: #777;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .format-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .format-tag {
+            padding: 0.3rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #1d4f91;
+            background: #e8f0fb;
+            border: 1px solid #bdd3f1;
+        }
+
+        .times {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+        }
+
+        .time-btn {
+            min-width: 110px;
+            border: 1px solid #c9d8ef;
+            background: #f4f8ff;
+            color: #153a6b;
+            border-radius: 8px;
+            padding: 0.55rem 0.65rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-btn small {
+            display: block;
+            font-size: 0.72rem;
+            color: #5f6b7c;
+            font-weight: normal;
+            margin-top: 1px;
+        }
+
+        .time-btn:hover {
+            background: #d4af37;
+            color: #1a0f08;
+            border-color: #c89f22;
+        }
+
+        .time-btn:hover small {
+            color: #1a0f08;
+        }
+
+        .back-wrap {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.3rem;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            color: #2c1810;
+            font-weight: bold;
+            text-decoration: none;
+            background: #fffdf8;
+        }
+
+        .back-link:hover {
+            background: #d4af37;
+            color: #1a0f08;
+        }
+
+        @media (max-width: 768px) {
+            .movie-schedule {
+                grid-template-columns: 1fr;
+            }
+
+            .movie-thumb {
+                height: 220px;
+            }
+
+            .time-btn {
+                flex: 1 1 48%;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 0.7rem;
+            }
+        }
+
+        .filter-notice {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2c1810;
+            color: #f9f7f4;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-family: Georgia, serif;
+            font-size: 0.95rem;
+            border-left: 4px solid #d4af37;
+        }
+        .filter-notice .filter-title { color: #d4af37; }
+        .filter-clear {
+            color: #d4af37;
+            text-decoration: none;
+            font-size: 0.88rem;
+            border: 1px solid #d4af37;
+            padding: 0.25rem 0.65rem;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .filter-clear:hover { background: #d4af37; color: #1a0f08; }
+        .no-results {
+            color: #2c1810;
+            font-style: italic;
+            padding: 1.5rem 0;
+            text-align: center;
+            font-family: Georgia, serif;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎞️ Cineteca Nacional</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="index.html#movies">Películas</a></li>
+                    <li><a href="index.html#categories">Categorías</a></li>
+                    <li><a href="horarios.html">Horarios</a></li>
+                    <li><a href="login.html">Acceder</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Horarios</h1>
+        <p>Consulta funciones disponibles por película y organiza tu visita a la Cineteca.</p>
+    </section>
+
+    <main class="container">
+        <section class="filters">
+            <h2>Selecciona una fecha</h2>
+            <div class="date-list">
+                <button class="date-chip active" data-date="01/04">Hoy<br>01/04</button>
+                <button class="date-chip" data-date="02/04">Mañana<br>02/04</button>
+                <button class="date-chip" data-date="03/04">Jue<br>03/04</button>
+                <button class="date-chip" data-date="04/04">Vie<br>04/04</button>
+                <button class="date-chip" data-date="05/04">Sáb<br>05/04</button>
+                <button class="date-chip" data-date="06/04">Dom<br>06/04</button>
+            </div>
+        </section>
+
+        <h2 class="schedule-title">Horarios disponibles</h2>
+
+        <div id="filterNotice" class="filter-notice" style="display:none">
+            <span>Mostrando horarios de: <strong class="filter-title"></strong></span>
+            <a href="horarios.html" class="filter-clear">Ver todos los horarios</a>
+        </div>
+
+        <section class="movie-schedule-list" id="movieScheduleList"></section>
+
+        <div class="back-wrap">
+            <a href="index.html" class="back-link">Volver al inicio</a>
+        </div>
+    </main>
+
+    <script>
+        const allMovies = [
+            { title: "Kill Bill: The Whole Bloody Affair", image: "Imagenes/kill.jpg", meta: "Acción/Thriller • 247 min", duration: 247 },
+            { title: "Paprika", image: "Imagenes/paprika.jpg", meta: "Anime/Sci-Fi • 90 min", duration: 90 },
+            { title: "Donnie Darko", image: "Imagenes/donnie.jpg", meta: "Thriller/Sci-Fi • 113 min", duration: 113 },
+            { title: "Anatomía de una Caída", image: "Imagenes/anatomy.jpg", meta: "Drama/Thriller • 151 min", duration: 151 },
+            { title: "The Sound of Metal", image: "Imagenes/sound.jpg", meta: "Drama • 120 min", duration: 120 },
+            { title: "Seven Samurai", image: "Imagenes/seven.jpg", meta: "Drama/Acción • 207 min", duration: 207 },
+            { title: "Rashomon", image: "Imagenes/rashomon.jpg", meta: "Drama/Misterio • 88 min", duration: 88 },
+            { title: "Amores Perros", image: "Imagenes/amores.jpg", meta: "Drama/Thriller • 154 min", duration: 154 },
+            { title: "Her", image: "Imagenes/her.jpg", meta: "Drama/Sci-Fi • 126 min", duration: 126 },
+            { title: "Perfect Blue", image: "Imagenes/blue.jpg", meta: "Anime/Thriller • 81 min", duration: 81 },
+            { title: "Marty Supreme", image: "Imagenes/marty supreme.jpg", meta: "Comedia/Drama • 92 min", duration: 92 }
+        ];
+
+        const dateKeys = ["01/04", "02/04", "03/04", "04/04", "05/04", "06/04"];
+
+        function minutesToClock(totalMinutes) {
+            const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+            const minutes = String(totalMinutes % 60).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function buildSchedulesByDate() {
+            const schedules = {};
+            const dayMovieCounts = [3, 2, 2, 3, 2, 2];
+            let movieIndex = 0;
+
+            dateKeys.forEach((date, dayIndex) => {
+                const rooms = [
+                    { name: "Tradicional 1", formatLabel: "Sala Tradicional", nextStart: 10 * 60 + 10 },
+                    { name: "Tradicional 2", formatLabel: "Sala Tradicional", nextStart: 10 * 60 + 30 },
+                    { name: "IMAX", formatLabel: "IMAX", nextStart: 10 * 60 + 50 }
+                ];
+
+                const moviesToday = [];
+                for (let i = 0; i < dayMovieCounts[dayIndex]; i++) {
+                    moviesToday.push(allMovies[movieIndex % allMovies.length]);
+                    movieIndex++;
+                }
+
+                const daySchedule = moviesToday.map((movie) => {
+                    rooms.sort((a, b) => a.nextStart - b.nextStart);
+                    const room = rooms[0];
+                    const showStart = room.nextStart;
+                    room.nextStart = showStart + movie.duration + 25;
+
+                    return {
+                        title: movie.title,
+                        image: movie.image,
+                        meta: movie.meta,
+                        formats: [room.formatLabel],
+                        showtimes: [
+                            { time: minutesToClock(showStart), room: room.name }
+                        ]
+                    };
+                });
+
+                schedules[date] = daySchedule;
+            });
+
+            return schedules;
+        }
+
+        const schedulesByDate = buildSchedulesByDate();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterMovie = urlParams.get('pelicula');
+
+        const dateChips = document.querySelectorAll('.date-chip');
+        const movieScheduleList = document.getElementById('movieScheduleList');
+        const filterNotice = document.getElementById('filterNotice');
+        let currentSelectedDate = '01/04';
+
+        if (filterMovie) {
+            filterNotice.style.display = 'flex';
+            filterNotice.querySelector('.filter-title').textContent = filterMovie;
+            for (const [date, movies] of Object.entries(schedulesByDate)) {
+                if (movies.some(m => m.title === filterMovie)) {
+                    currentSelectedDate = date;
+                    dateChips.forEach(chip => {
+                        chip.classList.toggle('active', chip.dataset.date === date);
+                    });
+                    break;
+                }
+            }
+        }
+
+        function goToSeats(movieTitle, date, room, time) {
+            const params = new URLSearchParams({
+                pelicula: movieTitle,
+                fecha: date,
+                sala: room,
+                hora: time
+            });
+            window.location.href = `asientos.html?${params.toString()}`;
+        }
+
+        function renderSchedules(selectedDate) {
+            let movies = schedulesByDate[selectedDate] || [];
+            if (filterMovie) {
+                movies = movies.filter(m => m.title === filterMovie);
+            }
+            movieScheduleList.innerHTML = '';
+
+            if (movies.length === 0) {
+                movieScheduleList.innerHTML = '<p class="no-results">No hay funciones disponibles para esta fecha.</p>';
+                return;
+            }
+
+            movies.forEach((movie) => {
+                const formatTags = movie.formats
+                    .map((format) => `<span class="format-tag">${format}</span>`)
+                    .join('');
+
+                const timeButtons = movie.showtimes
+                    .map((show) => `
+                        <button class="time-btn" onclick="goToSeats('${movie.title.replace(/'/g, "&#39;")}', '${selectedDate}', '${show.room}', '${show.time}')">${show.time}<small>${show.room}</small></button>
+                    `)
+                    .join('');
+
+                const card = document.createElement('article');
+                card.className = 'movie-schedule';
+                card.innerHTML = `
+                    <img src="${movie.image}" alt="${movie.title}" class="movie-thumb">
+                    <div class="movie-content">
+                        <h3>${movie.title}</h3>
+                        <p class="movie-meta">${movie.meta}</p>
+                        <div class="format-row">${formatTags}</div>
+                        <div class="times">${timeButtons}</div>
+                    </div>
+                `;
+                movieScheduleList.appendChild(card);
+            });
+        }
+
+        dateChips.forEach((chip) => {
+            chip.addEventListener('click', () => {
+                dateChips.forEach((item) => item.classList.remove('active'));
+                chip.classList.add('active');
+                currentSelectedDate = chip.dataset.date;
+                renderSchedules(currentSelectedDate);
+            });
+        });
+
+        renderSchedules(currentSelectedDate);
+    </script>
+</body>
+</html>

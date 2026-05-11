@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cineteca Nacional - Selección de Asientos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #f9f7f4;
+            color: #222;
+            line-height: 1.5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f08 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            color: #d4af37;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            margin-left: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            color: #d4af37;
+        }
+
+        .wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 95px 20px 40px;
+        }
+
+        .show-info {
+            background: white;
+            border: 1px solid #e3d9ca;
+            border-left: 5px solid #d4af37;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+        }
+
+        .show-info h1 {
+            color: #2c1810;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1rem;
+        }
+
+        .screen-area {
+            background: white;
+            border: 1px solid #e3d9ca;
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+
+        .screen {
+            width: 100%;
+            margin: 0 auto 1rem;
+            padding: 0.45rem;
+            text-align: center;
+            color: #2c1810;
+            font-weight: bold;
+            background: linear-gradient(to right, #f6ead0, #fff7e7, #f6ead0);
+            border-radius: 999px;
+            border: 1px solid #d4af37;
+            letter-spacing: 1px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1px solid #c7c7c7;
+        }
+
+        .dot.available { background: #fff; }
+        .dot.selected { background: #d4af37; border-color: #c89f22; }
+        .dot.taken { background: #c8c8c8; border-color: #b7b7b7; }
+
+        .seats-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .seat-row {
+            display: grid;
+            grid-template-columns: 24px repeat(10, minmax(24px, 1fr));
+            gap: 8px;
+            align-items: center;
+        }
+
+        .row-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .seat {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border: 1px solid #c8c8c8;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .seat:hover {
+            border-color: #d4af37;
+            transform: translateY(-1px);
+        }
+
+        .seat.selected {
+            background: #d4af37;
+            border-color: #c89f22;
+        }
+
+        .seat.taken {
+            background: #c8c8c8;
+            border-color: #b7b7b7;
+            cursor: not-allowed;
+        }
+
+        .summary {
+            background: white;
+            border: 1px solid #e3d9ca;
+            border-radius: 12px;
+            padding: 1rem;
+            height: fit-content;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+
+        .summary h2 {
+            font-size: 1.1rem;
+            color: #2c1810;
+            margin-bottom: 0.8rem;
+        }
+
+        .summary p {
+            color: #555;
+            margin-bottom: 0.45rem;
+            font-size: 0.95rem;
+        }
+
+        .selected-list {
+            min-height: 48px;
+            padding: 0.5rem;
+            background: #fffdf8;
+            border: 1px dashed #d4af37;
+            border-radius: 8px;
+            margin: 0.6rem 0 1rem;
+            color: #444;
+        }
+
+        .buy-btn {
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem;
+            background: #2c1810;
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            border: 2px solid #d4af37;
+        }
+
+        .buy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a class="logo" href="index.html">🎞️ Cineteca Nacional</a>
+            <nav>
+                <a href="index.html">Inicio</a>
+                <a href="horarios.html">Horarios</a>
+                <a href="login.html">Acceder</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrapper">
+        <section class="show-info">
+            <h1 id="movieTitle">Película</h1>
+            <p class="meta" id="showMeta">Fecha • Sala • Hora</p>
+        </section>
+
+        <section class="layout">
+            <article class="screen-area">
+                <div class="screen">PANTALLA</div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="dot available"></span> Disponible</div>
+                    <div class="legend-item"><span class="dot selected"></span> Seleccionado</div>
+                    <div class="legend-item"><span class="dot taken"></span> Ocupado</div>
+                </div>
+
+                <div id="seatsGrid" class="seats-grid"></div>
+            </article>
+
+            <aside class="summary">
+                <h2>Resumen</h2>
+                <p id="sumDate">Fecha:</p>
+                <p id="sumRoom">Sala:</p>
+                <p id="sumTime">Hora:</p>
+                <p id="sumCount">Boletos: 0</p>
+
+                <div class="selected-list" id="selectedList">Selecciona tus asientos.</div>
+
+                <button id="buyBtn" class="buy-btn" disabled>Continuar Compra</button>
+            </aside>
+        </section>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const movie = params.get('pelicula') || 'Película no especificada';
+        const date = params.get('fecha') || '--/--';
+        const room = params.get('sala') || 'Sala';
+        const time = params.get('hora') || '--:--';
+
+        document.getElementById('movieTitle').textContent = movie;
+        document.getElementById('showMeta').textContent = `${date} • ${room} • ${time}`;
+        document.getElementById('sumDate').textContent = `Fecha: ${date}`;
+        document.getElementById('sumRoom').textContent = `Sala: ${room}`;
+        document.getElementById('sumTime').textContent = `Hora: ${time}`;
+
+        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        const seatsPerRow = 10;
+        const seatsGrid = document.getElementById('seatsGrid');
+        const selectedList = document.getElementById('selectedList');
+        const sumCount = document.getElementById('sumCount');
+        const buyBtn = document.getElementById('buyBtn');
+        const selectedSeats = new Set();
+
+        function seededTaken(row, col) {
+            return false;
+        }
+
+        function updateSummary() {
+            const seats = Array.from(selectedSeats).sort();
+            sumCount.textContent = `Boletos: ${seats.length}`;
+            selectedList.textContent = seats.length ? seats.join(', ') : 'Selecciona tus asientos.';
+            buyBtn.disabled = seats.length === 0;
+        }
+
+        rows.forEach((row) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'seat-row';
+
+            const label = document.createElement('div');
+            label.className = 'row-label';
+            label.textContent = row;
+            rowDiv.appendChild(label);
+
+            for (let col = 1; col <= seatsPerRow; col++) {
+                const seatId = `${row}${col}`;
+                const seat = document.createElement('button');
+                seat.className = 'seat';
+                seat.type = 'button';
+                seat.setAttribute('aria-label', `Asiento ${seatId}`);
+
+                if (seededTaken(row, col)) {
+                    seat.classList.add('taken');
+                    seat.disabled = true;
+                }
+
+                seat.addEventListener('click', () => {
+                    if (seat.classList.contains('taken')) return;
+                    seat.classList.toggle('selected');
+                    if (seat.classList.contains('selected')) {
+                        selectedSeats.add(seatId);
+                    } else {
+                        selectedSeats.delete(seatId);
+                    }
+                    updateSummary();
+                });
+
+                rowDiv.appendChild(seat);
+            }
+
+            seatsGrid.appendChild(rowDiv);
+        });
+
+        buyBtn.addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

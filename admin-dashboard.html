@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Cineteca</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #f9f7f4;
+            color: #222;
+        }
+
+        /* Container Principal */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f08 100%);
+            color: #d4af37;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid #d4af37;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            background: rgba(212, 175, 55, 0.2);
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 2rem 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: #d4af37;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-left-color: #d4af37;
+        }
+
+        .sidebar-menu button {
+            display: block;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            color: #d4af37;
+            background: transparent;
+            border: none;
+            border-left: 4px solid transparent;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .sidebar-menu button:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-left-color: #d4af37;
+        }
+
+        .menu-section-title {
+            padding: 1.5rem 1.5rem 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #2c1810;
+            font-size: 1.8rem;
+        }
+
+        .logout-btn {
+            padding: 0.8rem 1.5rem;
+            background: #d4af37;
+            color: #1a0f08;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #e6c547;
+        }
+
+        /* Contenido Secciones */
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h2 {
+            color: #2c1810;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 1rem;
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        th {
+            background: #f0ebe5;
+            color: #2c1810;
+            padding: 1rem;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f9f7f4;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .badge-admin {
+            background: #d4af37;
+            color: #1a0f08;
+        }
+
+        .badge-editor {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-consultor {
+            background: #48bb78;
+            color: white;
+        }
+
+        /* Formularios */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c1810;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        /* Botones */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #d4af37;
+            color: #1a0f08;
+        }
+
+        .btn-primary:hover {
+            background: #e6c547;
+        }
+
+        .btn-secondary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #d4af37 0%, #e6c547 100%);
+            color: #1a0f08;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            color: #2c1810;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #d4af37;
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+
+        .alert-warning {
+            background: #feebc8;
+            color: #7c2d12;
+            border-left: 4px solid #ed8936;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🎞️ Cineteca</h2>
+                <div class="user-role">
+                    <span id="userRoleDisplay">Administrador</span>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-section-title">Principal</li>
+                <li><a href="#" class="menu-link active" data-section="dashboard">📊 Dashboard</a></li>
+
+                <li class="menu-section-title">Gestión</li>
+                <li><a href="#" class="menu-link" data-section="usuarios">👥 Usuarios</a></li>
+                <li><a href="#" class="menu-link" data-section="peliculas">🎬 Películas</a></li>
+                <li><a href="#" class="menu-link" data-section="salas">🎭 Salas</a></li>
+                <li><a href="#" class="menu-link" data-section="funciones">🕐 Funciones</a></li>
+
+                <li class="menu-section-title">Acceso</li>
+                <li><button onclick="goToHome()">🏠 Ir al Inicio</button></li>
+                <li><a href="#" onclick="logout()">🚪 Cerrar Sesión</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <!-- Alert -->
+            <div id="alert" class="alert"></div>
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="content-section active">
+                <h2>Panel de Control</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalUsuarios">0</h3>
+                        <p>Usuarios Registrados</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalPeliculas">0</h3>
+                        <p>Películas en Catálogo</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalSalas">0</h3>
+                        <p>Salas Disponibles</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalFunciones">0</h3>
+                        <p>Funciones Programadas</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2c1810;">Actividad Reciente</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Acción</th>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Función programada</td>
+                            <td>Sistema</td>
+                            <td>2026-04-01</td>
+                            <td><span class="badge badge-editor">Completado</span></td>
+                        </tr>
+                        <tr>
+                            <td>Usuario registrado</td>
+                            <td>Sistema</td>
+                            <td>2026-04-01</td>
+                            <td><span class="badge badge-consultor">Exitoso</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- USUARIOS -->
+            <section id="usuarios" class="content-section">
+                <h2>Gestión de Usuarios</h2>
+                <button class="btn btn-primary" onclick="openModal('usuarioModal')">+ Nuevo Usuario</button>
+
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: #2c1810; margin-bottom: 1rem;">Usuarios Registrados</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuariosTable">
+                            <tr><td colspan="4" style="text-align:center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PELÍCULAS -->
+            <section id="peliculas" class="content-section">
+                <h2>Administración de Películas</h2>
+                <button class="btn btn-primary" onclick="openModal('peliculaModal')">+ Nueva Película</button>
+
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: #2c1810; margin-bottom: 1rem;">Películas en Cartelera</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Año</th>
+                                <th>Género</th>
+                                <th>Duración</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="peliculasTable">
+                            <tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SALAS -->
+            <section id="salas" class="content-section">
+                <h2>Administración de Salas</h2>
+                <button class="btn btn-primary" onclick="openModal('salaModal')">+ Nueva Sala</button>
+
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: #2c1810; margin-bottom: 1rem;">Salas Disponibles</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Capacidad</th>
+                                <th>Tecnología</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salasTable">
+                            <tr><td colspan="4" style="text-align:center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- FUNCIONES -->
+            <section id="funciones" class="content-section">
+                <h2>Programación de Funciones</h2>
+                <button class="btn btn-primary" onclick="openModal('funcionModal')">+ Nueva Función</button>
+
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: #2c1810; margin-bottom: 1rem;">Funciones Programadas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Película</th>
+                                <th>Sala</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="funcionesTable">
+                            <tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Nuevo Usuario -->
+    <div id="usuarioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Usuario</h2>
+                <button class="close-btn" onclick="closeModal('usuarioModal')">×</button>
+            </div>
+            <form onsubmit="handleAddUser(event)">
+                <div class="form-group">
+                    <label for="userName">Nombre Completo</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Rol</label>
+                    <select id="userRole" required>
+                        <option value="administrador">Administrador</option>
+                        <option value="editor">Editor</option>
+                        <option value="consultor">Consultor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userPassword">Contraseña</label>
+                    <input type="password" id="userPassword" required>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('usuarioModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Película -->
+    <div id="peliculaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nueva Película</h2>
+                <button class="close-btn" onclick="closeModal('peliculaModal')">×</button>
+            </div>
+            <form onsubmit="handleAddMovie(event)">
+                <div class="form-group">
+                    <label for="movieTitle">Título</label>
+                    <input type="text" id="movieTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="movieYear">Año</label>
+                    <input type="number" id="movieYear" required>
+                </div>
+                <div class="form-group">
+                    <label for="movieGenre">Género</label>
+                    <input type="text" id="movieGenre" required>
+                </div>
+                <div class="form-group">
+                    <label for="movieDuration">Duración (minutos)</label>
+                    <input type="number" id="movieDuration" required>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">Agregar Película</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('peliculaModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Sala -->
+    <div id="salaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nueva Sala</h2>
+                <button class="close-btn" onclick="closeModal('salaModal')">×</button>
+            </div>
+            <form onsubmit="handleAddSala(event)">
+                <div class="form-group">
+                    <label for="salaName">Nombre</label>
+                    <input type="text" id="salaName" placeholder="Ej: Sala 1 - Gold" required>
+                </div>
+                <div class="form-group">
+                    <label for="salaCapacity">Capacidad</label>
+                    <input type="number" id="salaCapacity" placeholder="Ej: 150" required>
+                </div>
+                <div class="form-group">
+                    <label for="salaTech">Tecnología</label>
+                    <input type="text" id="salaTech" placeholder="Ej: 4K, Dolby Atmos" required>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">Crear Sala</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('salaModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Función -->
+<div id="funcionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Nueva Función</h2>
+            <button class="close-btn" onclick="closeModal('funcionModal')">×</button>
+        </div>
+        <form onsubmit="handleAddFuncion(event)">
+            <div class="form-group">
+                <label for="funcionPelicula">Película</label>
+                <select id="funcionPelicula" required>
+                    <option value="">Selecciona una película</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="funcionSala">Sala</label>
+                <select id="funcionSala" required>
+                    <option value="">Selecciona una sala</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="funcionFecha">Fecha</label>
+                <input type="date" id="funcionFecha" required>
+            </div>
+            <div class="form-group">
+                <label for="funcionHora">Hora</label>
+                <!-- ✅ IMPORTANTE: type="time" genera formato HH:mm -->
+                <input type="time" id="funcionHora" required>
+            </div>
+            <div class="form-group">
+                <label for="funcionPrecio">Precio</label>
+                <input type="number" id="funcionPrecio" step="0.01" placeholder="15.00" required>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary">Programar Función</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('funcionModal')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // ==================== AUTH ====================
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const usuario = localStorage.getItem('usuario');
+            if (!token || !usuario) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            const user = JSON.parse(usuario);
+            document.getElementById('userRoleDisplay').textContent = user.rol.charAt(0).toUpperCase() + user.rol.slice(1);
+            return true;
+        }
+
+        // ==================== NAVEGACIÓN ====================
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.getAttribute('data-section');
+
+                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+
+                document.getElementById('pageTitle').textContent = link.textContent.trim().replace(/[^a-zA-Záéíóúñ\s]/g, '');
+
+                if (section === 'usuarios') loadUsuarios();
+                if (section === 'peliculas') loadPeliculas();
+                if (section === 'salas') loadSalas();
+                if (section === 'funciones') loadFunciones();
+                if (section === 'dashboard') loadDashboard();
+            });
+        });
+
+        // ==================== DASHBOARD ====================
+        async function loadDashboard() {
+            try {
+                const token = localStorage.getItem('token');
+                const [usersRes, moviesRes, salasRes, funcionesRes] = await Promise.all([
+                    fetch(`${API_URL}/api/usuarios`, { 
+                        headers: { 'Authorization': `Bearer ${token}` } 
+                    }),
+                    fetch(`${API_URL}/api/peliculas`, { 
+                        headers: { 'Authorization': `Bearer ${token}` } 
+                    }),
+                    fetch(`${API_URL}/api/salas`, { 
+                        headers: { 'Authorization': `Bearer ${token}` } 
+                    }),
+                    fetch(`${API_URL}/api/funciones`, { 
+                        headers: { 'Authorization': `Bearer ${token}` } 
+                    })
+                ]);
+
+                if (usersRes.ok && moviesRes.ok && salasRes.ok && funcionesRes.ok) {
+                    const users = await usersRes.json();
+                    const movies = await moviesRes.json();
+                    const salas = await salasRes.json();
+                    const funciones = await funcionesRes.json();
+                    
+                    document.getElementById('totalUsuarios').textContent = users.length || 0;
+                    document.getElementById('totalPeliculas').textContent = movies.length || 0;
+                    document.getElementById('totalSalas').textContent = salas.length || 0;
+                    document.getElementById('totalFunciones').textContent = funciones.length || 0;
+                } else {
+                    console.error('Error cargando dashboard');
+                    showAlert('Error al cargar el dashboard', 'error');
+                }
+            } catch (e) {
+                console.error('Error:', e);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        // ==================== USUARIOS ====================
+        async function loadUsuarios() {
+            try {
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    showAlert('❌ No hay token de autenticación', 'error');
+                    return;
+                }
+
+                const res = await fetch(`${API_URL}/api/usuarios`, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    showAlert(`Error: ${errorData.error || 'No se pudieron cargar los usuarios'}`, 'error');
+                    console.error('Error response:', errorData);
+                    return;
+                }
+
+                const users = await res.json();
+                renderUsuarios(users);
+            } catch (e) {
+                console.error('Error:', e);
+                showAlert('Error de conexión al cargar usuarios', 'error');
+            }
+        }
+
+        function renderUsuarios(users) {
+            const tbody = document.getElementById('usuariosTable');
+            
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay usuarios</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.nombre}</td>
+                    <td>${u.email}</td>
+                    <td><span class="badge badge-${u.rol}">${u.rol}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="editUser(${u.id}, '${u.nombre}', '${u.email}', '${u.rol}')">Editar</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteUser(${u.id}, '${u.nombre}')">Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function handleAddUser(event) {
+            event.preventDefault();
+            
+            const nombre = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const rol = document.getElementById('userRole').value;
+            const password = document.getElementById('userPassword').value;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/usuarios`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nombre, email, password, rol })
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Usuario creado`, 'success');
+                    closeModal('usuarioModal');
+                    event.target.reset();
+                    loadUsuarios();
+                    loadDashboard();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Error', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        function editUser(userId, nombre, email, rol) {
+            const newNombre = prompt('Nuevo nombre:', nombre);
+            if (!newNombre) return;
+            const newEmail = prompt('Nuevo email:', email);
+            if (!newEmail) return;
+            const newRol = prompt('Nuevo rol (administrador/editor/consultor):', rol);
+            if (!newRol) return;
+
+            updateUser(userId, newNombre, newEmail, newRol);
+        }
+
+        async function updateUser(userId, nombre, email, rol) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/usuarios/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nombre, email, rol })
+                });
+
+                if (response.ok) {
+                    showAlert('✅ Usuario actualizado', 'success');
+                    loadUsuarios();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al actualizar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        async function deleteUser(userId, nombre) {
+            if (!confirm(`¿Eliminar usuario "${nombre}"?`)) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/usuarios/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Usuario eliminado`, 'success');
+                    loadUsuarios();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al eliminar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        // ==================== PELÍCULAS ====================
+        let moviesData = {};
+
+        async function loadPeliculas() {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/api/peliculas`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const movies = await res.json();
+                    renderPeliculas(movies);
+                    updateFuncionSelects();
+                } else {
+                    showAlert('Error al cargar películas', 'error');
+                }
+            } catch (e) {
+                console.error('Error:', e);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        function renderPeliculas(movies) {
+            const tbody = document.getElementById('peliculasTable');
+            
+            if (!movies || movies.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay películas</td></tr>';
+                return;
+            }
+
+            moviesData = {};
+            
+            tbody.innerHTML = movies.map(m => {
+                moviesData[m.id] = m;
+                return `
+                    <tr>
+                        <td>${m.Titulo}</td>
+                        <td>${m.Año}</td>
+                        <td>${m.Genero}</td>
+                        <td>${m.Duracion} min</td>
+                        <td>
+                            <button class="btn btn-secondary btn-small" onclick="editMovie(${m.id})">Editar</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteMovie(${m.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleAddMovie(event) {
+            event.preventDefault();
+            
+            const Titulo = document.getElementById('movieTitle').value.trim();
+            const Año = parseInt(document.getElementById('movieYear').value);
+            const Genero = document.getElementById('movieGenre').value;
+            const Duracion = parseInt(document.getElementById('movieDuration').value);
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/peliculas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ Titulo, Año, Genero, Duracion })
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Película agregada`, 'success');
+                    closeModal('peliculaModal');
+                    event.target.reset();
+                    loadPeliculas();
+                    loadDashboard();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Error', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        function editMovie(movieId) {
+            const m = moviesData[movieId];
+            if (!m) return;
+            
+            const newTitulo = prompt('Nuevo título:', m.Titulo);
+            if (!newTitulo) return;
+            const newAño = prompt('Nuevo año:', m.Año);
+            if (!newAño || isNaN(newAño)) return;
+            const newGenero = prompt('Nuevo género:', m.Genero);
+            if (!newGenero) return;
+            const newDuracion = prompt('Nueva duración:', m.Duracion);
+            if (!newDuracion || isNaN(newDuracion)) return;
+
+            updateMovie(movieId, newTitulo, parseInt(newAño), newGenero, parseInt(newDuracion));
+        }
+
+        async function updateMovie(movieId, Titulo, Año, Genero, Duracion) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/peliculas/${movieId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ Titulo, Año, Genero, Duracion })
+                });
+
+                if (response.ok) {
+                    showAlert('✅ Película actualizada', 'success');
+                    loadPeliculas();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al actualizar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        async function deleteMovie(movieId) {
+            const m = moviesData[movieId];
+            if (!m || !confirm(`¿Eliminar "${m.Titulo}"?`)) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/peliculas/${movieId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Película eliminada`, 'success');
+                    loadPeliculas();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al eliminar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        // ==================== SALAS ====================
+        let salasData = {};
+
+        async function loadSalas() {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/api/salas`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const salas = await res.json();
+                    renderSalas(salas);
+                    updateFuncionSelects();
+                } else {
+                    showAlert('Error al cargar salas', 'error');
+                }
+            } catch (e) {
+                console.error('Error:', e);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        function renderSalas(salas) {
+            const tbody = document.getElementById('salasTable');
+            
+            if (!salas || salas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay salas</td></tr>';
+                return;
+            }
+
+            salasData = {};
+            
+            tbody.innerHTML = salas.map(s => {
+                salasData[s.id] = s;
+                return `
+                    <tr>
+                        <td>${s.nombre}</td>
+                        <td>${s.capacidad}</td>
+                        <td>${s.tecnologia}</td>
+                        <td>
+                            <button class="btn btn-secondary btn-small" onclick="editSala(${s.id})">Editar</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteSala(${s.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleAddSala(event) {
+            event.preventDefault();
+            
+            const nombre = document.getElementById('salaName').value.trim();
+            const capacidad = parseInt(document.getElementById('salaCapacity').value);
+            const tecnologia = document.getElementById('salaTech').value.trim();
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/salas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nombre, capacidad, tecnologia })
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Sala creada`, 'success');
+                    closeModal('salaModal');
+                    event.target.reset();
+                    loadSalas();
+                    loadDashboard();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Error', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        function editSala(salaId) {
+            const s = salasData[salaId];
+            if (!s) return;
+            
+            const newNombre = prompt('Nuevo nombre:', s.nombre);
+            if (!newNombre) return;
+            const newCapacidad = prompt('Nueva capacidad:', s.capacidad);
+            if (!newCapacidad || isNaN(newCapacidad)) return;
+            const newTecnologia = prompt('Nueva tecnología:', s.tecnologia);
+            if (!newTecnologia) return;
+
+            updateSala(salaId, newNombre, parseInt(newCapacidad), newTecnologia);
+        }
+
+        async function updateSala(salaId, nombre, capacidad, tecnologia) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/salas/${salaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nombre, capacidad, tecnologia })
+                });
+
+                if (response.ok) {
+                    showAlert('✅ Sala actualizada', 'success');
+                    loadSalas();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al actualizar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        async function deleteSala(salaId) {
+            const s = salasData[salaId];
+            if (!s || !confirm(`¿Eliminar "${s.nombre}"?`)) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/salas/${salaId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Sala eliminada`, 'success');
+                    loadSalas();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al eliminar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        // ==================== FUNCIONES ====================
+        let funcionesData = {};
+
+        async function loadFunciones() {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/api/funciones`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const funciones = await res.json();
+                    renderFunciones(funciones);
+                } else {
+                    showAlert('Error al cargar funciones', 'error');
+                }
+            } catch (e) {
+                console.error('Error:', e);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        function renderFunciones(funciones) {
+            const tbody = document.getElementById('funcionesTable');
+            
+            if (!funciones || funciones.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay funciones</td></tr>';
+                return;
+            }
+
+            funcionesData = {};
+            
+            tbody.innerHTML = funciones.map(f => {
+                funcionesData[f.id] = f;
+                
+                const fecha = new Date(f.fecha).toLocaleDateString('es-ES');
+                
+                let hora = f.hora;
+                if (typeof f.hora === 'string') {
+                    if (f.hora.includes('T')) {
+                        hora = f.hora.split('T')[1].substring(0, 5);
+                    } else if (f.hora.length > 5) {
+                        hora = f.hora.substring(0, 5);
+                    }
+                }
+                
+                const peliculaTitulo = f.peliculaTitulo || 'Sin película';
+                const salaNombre = f.salaNombre || 'Sin sala';
+                
+                return `
+                    <tr>
+                        <td>${peliculaTitulo}</td>
+                        <td>${salaNombre}</td>
+                        <td>${fecha}</td>
+                        <td>${hora}</td>
+                        <td>$${f.precio.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-secondary btn-small" onclick="editFuncion(${f.id})">Editar</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteFuncion(${f.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function updateFuncionSelects() {
+            try {
+                const token = localStorage.getItem('token');
+                const [moviesRes, salasRes] = await Promise.all([
+                    fetch(`${API_URL}/api/peliculas`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/api/salas`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                if (moviesRes.ok && salasRes.ok) {
+                    const movies = await moviesRes.json();
+                    const salas = await salasRes.json();
+
+                    const peliculaSelect = document.getElementById('funcionPelicula');
+                    const salaSelect = document.getElementById('funcionSala');
+
+                    if (peliculaSelect && salaSelect) {
+                        peliculaSelect.innerHTML = '<option value="">Selecciona una película</option>';
+                        salaSelect.innerHTML = '<option value="">Selecciona una sala</option>';
+
+                        if (movies && movies.length > 0) {
+                            movies.forEach(m => {
+                                const option = document.createElement('option');
+                                option.value = m.id;
+                                option.textContent = m.Titulo;
+                                peliculaSelect.appendChild(option);
+                            });
+                        }
+
+                        if (salas && salas.length > 0) {
+                            salas.forEach(s => {
+                                salasData[s.id] = s;
+                                const option = document.createElement('option');
+                                option.value = s.id;
+                                option.textContent = `${s.nombre} (${s.capacidad} asientos)`;
+                                salaSelect.appendChild(option);
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error actualizando selects:', e);
+            }
+        }
+
+        async function handleAddFuncion(event) {
+    event.preventDefault();
+    
+    const peliculaId = parseInt(document.getElementById('funcionPelicula').value);
+    const salaId = parseInt(document.getElementById('funcionSala').value);
+    const fecha = document.getElementById('funcionFecha').value;
+    const hora = document.getElementById('funcionHora').value;
+    const precio = parseFloat(document.getElementById('funcionPrecio').value);
+
+    // ✅ VALIDACIÓN Y DEPURACIÓN
+    console.log('📝 Datos antes de enviar:');
+    console.log('  peliculaId:', peliculaId, typeof peliculaId);
+    console.log('  salaId:', salaId, typeof salaId);
+    console.log('  fecha:', fecha, typeof fecha);
+    console.log('  hora:', hora, typeof hora);
+    console.log('  precio:', precio, typeof precio);
+
+    if (!peliculaId || !salaId || !fecha || !hora || !precio) {
+        showAlert('Por favor completa todos los campos', 'error');
+        return;
+    }
+
+    // ✅ VALIDAR FORMATO DE HORA
+    if (!/^\d{2}:\d{2}$/.test(hora)) {
+        showAlert('❌ La hora debe estar en formato HH:mm (ej: 20:30)', 'error');
+        console.error('Formato hora inválido:', hora);
+        return;
+    }
+
+    // ✅ VALIDAR FORMATO DE FECHA
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+        showAlert('❌ La fecha debe estar en formato YYYY-MM-DD', 'error');
+        console.error('Formato fecha inválido:', fecha);
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        
+        const payload = {
+            peliculaId,
+            salaId,
+            fecha,
+            hora,
+            precio
+        };
+
+        console.log('📤 Enviando payload:', JSON.stringify(payload, null, 2));
+
+        const response = await fetch(`${API_URL}/api/funciones`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('📥 Response status:', response.status);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Respuesta del servidor:', data);
+            showAlert(`✅ Función programada correctamente`, 'success');
+            closeModal('funcionModal');
+            event.target.reset();
+            loadFunciones();
+            loadDashboard();
+            updateFuncionSelects();
+        } else {
+            const errorData = await response.json();
+            console.error('❌ Error del servidor:', errorData);
+            showAlert(errorData.error || 'Error al crear función', 'error');
+        }
+    } catch (err) {
+        console.error('❌ Error de conexión:', err);
+        showAlert('Error de conexión: ' + err.message, 'error');
+    }
+}
+        function editFuncion(funcionId) {
+            const f = funcionesData[funcionId];
+            if (!f) return;
+            
+            let fecha = f.fecha;
+            if (fecha.includes('T')) {
+                fecha = fecha.split('T')[0];
+            }
+            
+            let hora = f.hora;
+            if (typeof hora === 'string') {
+                if (hora.includes('T')) {
+                    hora = hora.split('T')[1].substring(0, 5);
+                } else if (hora.length > 5) {
+                    hora = hora.substring(0, 5);
+                }
+            }
+            
+            const newFecha = prompt('Nueva fecha (YYYY-MM-DD):', fecha);
+            if (!newFecha) return;
+            
+            const newHora = prompt('Nueva hora (HH:MM):', hora);
+            if (!newHora) return;
+            
+            const newPrecio = prompt('Nuevo precio:', f.precio);
+            if (!newPrecio || isNaN(newPrecio)) return;
+
+            updateFuncion(funcionId, newFecha, newHora, parseFloat(newPrecio));
+        }
+
+        async function updateFuncion(funcionId, fecha, hora, precio) {
+            try {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+                    showAlert('Formato de fecha inválido. Usa YYYY-MM-DD', 'error');
+                    return;
+                }
+                
+                if (!/^\d{2}:\d{2}(:\d{2})?$/.test(hora)) {
+                    showAlert('Formato de hora inválido. Usa HH:MM', 'error');
+                    return;
+                }
+                
+                const horaFormato = hora.length === 5 ? `${hora}:00` : hora;
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/funciones/${funcionId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fecha, hora: horaFormato, precio })
+                });
+
+                if (response.ok) {
+                    showAlert('✅ Función actualizada', 'success');
+                    loadFunciones();
+                    loadDashboard();
+                } else {
+                    const data = await response.json();
+                    showAlert(data.error || 'Error al actualizar', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        async function deleteFuncion(funcionId) {
+            const f = funcionesData[funcionId];
+            if (!f || !confirm(`¿Eliminar esta función?`)) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/funciones/${funcionId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showAlert(`✅ Función eliminada`, 'success');
+                    loadFunciones();
+                    loadDashboard();
+                } else {
+                    showAlert('Error al eliminar', 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showAlert('Error', 'error');
+            }
+        }
+
+        // ==================== UTILIDADES ====================
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+            setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+
+        function logout() {
+            if (confirm('¿Cerrar sesión?')) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // ==================== INICIALIZAR ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                console.log('✅ Autenticación OK');
+                loadDashboard();
+                loadPeliculas();
+                loadSalas();
+                setTimeout(() => {
+                    loadFunciones();
+                    updateFuncionSelects();
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>
